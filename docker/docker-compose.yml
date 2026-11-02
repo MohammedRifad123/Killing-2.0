@@ -1,0 +1,45 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: killing2_web
+    networks:
+      public_net:
+        ipv4_address: 192.168.150.100
+      internal_net:
+        ipv4_address: 172.16.0.10
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  admin:
+    image: nginx:alpine
+    container_name: killing2_admin
+    networks:
+      internal_net:
+        ipv4_address: 172.16.0.3
+    restart: unless-stopped
+
+  database:
+    image: mysql:8.0
+    container_name: killing2_db
+    networks:
+      internal_net:
+        ipv4_address: 172.16.0.2
+    environment:
+      MYSQL_ROOT_PASSWORD: "nottheflag"
+    restart: unless-stopped
+
+networks:
+  public_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.150.0/24
+  internal_net:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.16.0.0/24
